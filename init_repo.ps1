@@ -103,10 +103,20 @@ if ($LASTEXITCODE -ne 0) {
     Exit 1
 }
 
-Write-Host "Successfully created GitHub repository: $repoName ($visibility)"
+Write-Host "Successfully created GitHub repository: $repoName ($visibility)" -ForegroundColor Green
 
-# Set up the remote origin and push the new repository
-git remote add origin https://github.com/$githubUsername/$repoName.git
+# Set up the remote origin
+$remoteExists = git remote | Select-String -Pattern '^origin$' -Quiet
+
+if ($remoteExists) {
+    Write-Host "Remote 'origin' already exists. Updating the remote URL to https://github.com/$githubUsername/$repoName.git." -ForegroundColor Yellow
+    git remote set-url origin https://github.com/$githubUsername/$repoName.git
+} else {
+    Write-Host "Adding remote 'origin' (https://github.com/$githubUsername/$repoName.git)." -ForegroundColor Cyan
+    git remote add origin https://github.com/$githubUsername/$repoName.git
+}
+
+# Push the new repository
 git branch -M $mainBranch
 git push -u origin $mainBranch
 
